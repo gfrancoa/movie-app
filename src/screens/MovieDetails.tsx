@@ -11,7 +11,9 @@ import styled from 'styled-components/native';
 import {useTheme} from '@react-navigation/native';
 import Subtitles from '../components/Subtitles';
 import Avatar from '../components/Avatar';
-import {getMovieCredits, getMovieDetails} from '../../api/api';
+import {useDispatch, useSelector} from 'react-redux';
+import type {RootState} from '../redux/store';
+import {getCast, getMovie} from '../redux/movieSlice';
 import Loading from '../components/Loading';
 import MaterialComIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -44,10 +46,11 @@ const initialCast: Cast[] = [];
 
 export default function MovieDetails(props) {
   const movieId = props.route.params.movieId;
-  const [movie, setMovie] = React.useState(initialMovie);
-  const [cast, setCast] = React.useState(initialCast);
-  const [loading, setLoading] = React.useState(true);
   const [isPressed, setIsPressed] = React.useState(false);
+  const dispatch = useDispatch();
+  const {movieDetails, loading, castOfMovie} = useSelector(
+    (state: RootState) => state.movies,
+  );
 
   const {colors} = useTheme();
 
@@ -107,7 +110,9 @@ export default function MovieDetails(props) {
   `;
 
   const ImageBackground = styled.ImageBackground`
-    background-color: ${!movie.backdrop_path ? COLORS.grey : 'transparent'};
+    background-color: ${!movieDetails.backdrop_path
+      ? COLORS.grey
+      : 'transparent'};
 
     height: 298px;
     align-items: center;
@@ -115,16 +120,8 @@ export default function MovieDetails(props) {
   `;
 
   React.useEffect(() => {
-    console.log('movieid', movieId);
-    getMovieDetails(movieId).then(mov => {
-      console.log('resp movie', mov);
-      setMovie(mov);
-      getMovieCredits(movieId).then(credits => {
-        console.log('resp creditos', credits);
-        setCast(credits.cast);
-        setLoading(false);
-      });
-    });
+    dispatch(getCast(movieId));
+    dispatch(getMovie(movieId));
   }, []);
 
   if (loading) {
@@ -134,8 +131,8 @@ export default function MovieDetails(props) {
   return (
     <Container>
       <StatusBar hidden={true} />
-      <ImageBackground source={{uri: URL_IMG + movie.backdrop_path}}>
-        {!movie.backdrop_path ? (
+      <ImageBackground source={{uri: URL_IMG + movieDetails.backdrop_path}}>
+        {!movieDetails.backdrop_path ? (
           <MaterialComIcons
             name="movie-open"
             color="rgba(255,255,255,0.3)"
@@ -160,7 +157,7 @@ export default function MovieDetails(props) {
 
       <TextContainer>
         <TitleContainer>
-          <Title>{movie.title}</Title>
+          <Title>{movieDetails.title}</Title>
           <FastImage
             style={{
               width: wp('5%'),
@@ -174,13 +171,13 @@ export default function MovieDetails(props) {
           <Button>
             <ButtonText>WATCH NOW</ButtonText>
           </Button>
-          <Rating {...propsRating} value={movie.vote_average} />
+          <Rating {...propsRating} value={movieDetails.vote_average} />
         </TitleContainer>
 
-        <Overview>{movie.overview}</Overview>
+        <Overview>{movieDetails.overview}</Overview>
         <FlatList
           horizontal={true}
-          data={cast}
+          data={castOfMovie}
           initialNumToRender={8}
           onEndReachedThreshold={1}
           // keyExtractor={item => item.id.toString()}
@@ -192,9 +189,15 @@ export default function MovieDetails(props) {
             );
           }}
         />
-        <Subtitles title="Studio" subtitle={movie.production_companies} />
-        <Subtitles title="Genre" subtitle={movie.genres} />
-        <Subtitles title="Release" subtitle={movie.release_date.slice(0, 4)} />
+        <Subtitles
+          title="Studio"
+          subtitle={movieDetails.production_companies}
+        />
+        <Subtitles title="Genre" subtitle={movieDetails.genres} />
+        <Subtitles
+          title="Release"
+          subtitle={movieDetails.release_date.slice(0, 4)}
+        />
       </TextContainer>
     </Container>
   );

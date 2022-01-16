@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  FlatList,
-  Keyboard,
-  KeyboardAvoidingView,
-  ScrollView,
-  StatusBar,
-  TouchableOpacity,
-} from 'react-native';
+import {FlatList, StatusBar, TouchableOpacity} from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -16,37 +9,31 @@ import {COLORS} from '../../utils/constants';
 import {useTheme} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import SingleMovieList from '../components/SingleMovieList';
-import {
-  getRecommendedMovies,
-  getTopRatedMovies,
-  searchMovies,
-} from '../../api/api';
 import MovieCard from '../components/MovieCard';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  getTopRated,
+  getRecommended,
+  getSearchResults,
+} from '../redux/movieSlice';
+import type {RootState} from '../redux/store';
 
 export default function Home(props) {
-  const [recommended, setRecommended] = React.useState([]);
-  const [topRated, setTopRated] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
   const [inputSearch, setInputSearch] = React.useState('');
-  const [searchResults, setSearchResults] = React.useState('');
+
   let input = '';
+  const dispatch = useDispatch();
+  const {topRatedMovies, loading, recommendedMovies, searchResults} =
+    useSelector((state: RootState) => state.movies);
 
   React.useEffect(() => {
-    getRecommendedMovies().then(recom => {
-      setRecommended(recom.results);
-      getTopRatedMovies().then(top => {
-        setTopRated(top.results);
-        setLoading(false);
-      });
-    });
+    dispatch(getRecommended());
+    dispatch(getTopRated());
   }, []);
 
   const searchingMovies = (text: any) => {
     if (text.length > 0) {
-      searchMovies(text).then(result => {
-        console.log('resp result', result);
-        setSearchResults(result.results);
-      });
+      dispatch(getSearchResults(text));
     }
   };
 
@@ -163,13 +150,13 @@ export default function Home(props) {
           <>
             <SingleMovieList
               loading={loading}
-              movieList={recommended}
+              movieList={recommendedMovies}
               title="RECOMMENDED FOR YOU"
               navigation={props.navigation}
             />
             <SingleMovieList
               loading={loading}
-              movieList={topRated}
+              movieList={topRatedMovies}
               title="TOP RATED"
               navigation={props.navigation}
             />

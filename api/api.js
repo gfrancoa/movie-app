@@ -1,81 +1,37 @@
 import {API_HOST, API_KEY, API_TOKEN} from '../utils/constants';
 
 //recommended movies based on popular ones. Only first page shown
-export function getRecommendedMovies() {
+
+export async function getRecommendedMovies() {
   const url = `${API_HOST}/movie/popular${API_KEY}&language=en-US&page=1`;
-  return fetch(url)
-    .then(response => {
-      return response.json();
-    })
-    .then(result => {
-      return result;
-    })
-    .catch(err => {
-      console.log('error when retrieving recommended', err);
-      return err;
-    });
+  const response = await fetch(url);
+  return (await response.json()).results;
 }
 
 //Top rated movies. Only first page results
-export function getTopRatedMovies() {
+export async function getTopRatedMovies() {
   const url = `${API_HOST}/movie/top_rated${API_KEY}&language=en-US&page=1`;
-  return fetch(url)
-    .then(response => {
-      return response.json();
-    })
-    .then(result => {
-      return result;
-    })
-    .catch(err => {
-      console.log('error when retrieving most rated movies', err);
-      return err;
-    });
+  const response = await fetch(url);
+  return (await response.json()).results;
 }
 
 //get details of a movie using its id
-export function getMovieDetails(movieId) {
+export async function getMovieDetails(movieId) {
   const url = `${API_HOST}/movie/${movieId}${API_KEY}&language=en-US`;
-  return fetch(url)
-    .then(response => {
-      return response.json();
-    })
-    .then(result => {
-      return result;
-    })
-    .catch(err => {
-      console.log('error when retrieving movie', err);
-      return err;
-    });
+  const response = await fetch(url);
+  return await response.json();
 }
 
 //search movies in the search bar
-export function searchMovies(query) {
+export async function searchMovies(query) {
   const url = `${API_HOST}/search/movie${API_KEY}&language=en-US&page=1&include_adult=false&query=${query}`;
-  return fetch(url)
-    .then(response => {
-      return response.json();
-    })
-    .then(result => {
-      return result;
-    })
-    .catch(err => {
-      console.log('error when searching', err);
-      return err;
-    });
+  const response = await fetch(url);
+  return (await response.json()).results;
 }
 
 //get cast of the movie
-export function getMovieCredits(movieId) {
+export async function getMovieCredits(movieId) {
   const url = `${API_HOST}/movie/${movieId}/credits${API_KEY}&language=en-US&page=1`;
-  return fetch(url)
-    .then(response => {
-      return response.json();
-    })
-    .then(result => {
-      return result;
-    })
-    .catch(err => {
-      console.log('error when retrieving credits', err);
-      return err;
-    });
+  const response = await fetch(url);
+  return (await response.json()).cast;
 }
