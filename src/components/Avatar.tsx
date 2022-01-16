@@ -22,6 +22,8 @@ export default function Avatar(props) {
     border-radius: 50px;
     overflow: hidden;
     background-color: ${!props.profilePath ? COLORS.grey : 'transparent'};
+    justify-content: center;
+    align-items: center;
   `;
 
   const Title = styled.Text`
